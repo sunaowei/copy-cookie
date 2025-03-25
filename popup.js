@@ -43,7 +43,7 @@ const onPasteButtonClick = async () => {
         return alert('Uh-Oh! You need to copy the cookies first.');
 
     let domain = document.getElementById('domainInput').value.trim();
-    if (!domain) domain = 'localhost';
+    if (!domain) domain = 'http://localhost';
 
     chrome.tabs.query(
         {
@@ -57,22 +57,20 @@ const onPasteButtonClick = async () => {
             }
 
             chrome.cookies.getAll({ url: tab[0].url }, cookies => {
-                removeOldCookies(cookies, 0, tab[0].url, () => {
-                    copyCookieData.forEach(({ name, value, path }) => {
-                        try {
-                            chrome.cookies.set({
-                                url: tab[0].url,
-                                name,
-                                value,
-                                path,
-                                domain,
-                            });
-                        } catch (error) {
-                            console.error(`There was an error: ${error}`);
-                        }
-                    });
-                    onResetButtonClick('paste');
+                copyCookieData.forEach(({ name, value, path }) => {
+                    try {
+                        chrome.cookies.set({
+                            url: domain,
+                            name,
+                            value,
+                            path,
+                            domain: domain.replace('http://', '').replace('https://', ''),
+                        });
+                    } catch (error) {
+                        console.error(`There was an error: ${error}`);
+                    }
                 });
+                onResetButtonClick('paste');
             });
         },
     );
